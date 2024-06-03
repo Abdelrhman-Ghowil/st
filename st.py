@@ -2,11 +2,12 @@ import streamlit as st
 from transformers import pipeline
 from PIL import Image
 import numpy as np
-import io
+
+# Initialize the segmentation pipeline once
+pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code=True)
 
 # Function to perform image segmentation
 def segment_image(image):
-    pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code=True)
     # Convert PIL image to numpy array
     image_np = np.array(image)
     # Perform image segmentation
@@ -30,4 +31,3 @@ if uploaded_file is not None:
         
         st.image(segmented_image, caption="Segmented Image", use_column_width=True)
         st.image(mask, caption="Mask", use_column_width=True)
-
