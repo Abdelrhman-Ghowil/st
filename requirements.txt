@@ -7,3 +7,4 @@ scikit-image
 streamlit
 huggingface_hub
 transformers>=4.39.1
+requests
