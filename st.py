@@ -1,39 +1,35 @@
+import os
 import streamlit as st
-from transformers import pipeline
 from PIL import Image
-import numpy as np
+from transformers import pipeline
 
-# Initialize the segmentation pipeline once
-pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code=True)
+def remove_background(image, log_func=None):
+    pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code=True)
+    output_img = pipe(image)
+    return output_img
 
-# Function to perform image segmentation
-def segment_image(image):
-    try:
-        # Perform image segmentation
-        results = pipe(image)
-        # Get the segmented image and mask
-        segmented_image = results[0]['segmentation']
-        mask = results[0]['mask']
-        # Convert results back to PIL images for display
-        segmented_image_pil = Image.fromarray(segmented_image.astype(np.uint8))
-        mask_pil = Image.fromarray(mask.astype(np.uint8))
-        return segmented_image_pil, mask_pil
-    except Exception as e:
-        st.error(f"An error occurred during segmentation: {e}")
-        return None, None
-
-# Streamlit UI
-st.title("Image Segmentation with Transformers")
+st.title("Background Remover App")
+st.write("Upload an image to remove its background")
 
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption="Original Image", use_column_width=True)
+    input_img = Image.open(uploaded_file).convert("RGB")
+    st.image(input_img, caption='Uploaded Image', use_column_width=True)
     
-    if st.button("Segment Image"):
-        segmented_image, mask = segment_image(image)
-        
-        if segmented_image and mask:
-            st.image(segmented_image, caption="Segmented Image", use_column_width=True)
-            st.image(mask, caption="Mask", use_column_width=True)
+    with st.spinner('Removing background...'):
+        output_img = remove_background(input_img)
+    
+    st.image(output_img, caption='Background Removed Image', use_column_width=True)
+    
+    # Provide an option to download the processed image
+    output_filename = os.path.splitext(uploaded_file.name)[0] + '_no_bg.png'
+    output_img.save(output_filename, "PNG")
+    
+    with open(output_filename, "rb") as file:
+        btn = st.download_button(
+            label="Download image",
+            data=file,
+            file_name=output_filename,
+            mime="image/png"
+        )
