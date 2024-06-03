@@ -31,5 +31,3 @@ if uploaded_file is not None:
         st.image(segmented_image, caption="Segmented Image", use_column_width=True)
         st.image(mask, caption="Mask", use_column_width=True)
 
-if __name__ == "__main__":
-    st.run()
