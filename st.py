@@ -9,13 +9,11 @@ pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code
 # Function to perform image segmentation
 def segment_image(image):
     try:
-        # Convert PIL image to a numpy array
-        image_np = np.array(image)
         # Perform image segmentation
-        results = pipe(image_np)
+        results = pipe(image)
         # Get the segmented image and mask
-        segmented_image = Image.fromarray(results[0]['segmentation'])
-        mask = Image.fromarray(results[0]['mask'])
+        segmented_image = results[0]['segmentation']
+        mask = results[0]['mask']
         return segmented_image, mask
     except Exception as e:
         st.error(f"An error occurred during segmentation: {e}")
