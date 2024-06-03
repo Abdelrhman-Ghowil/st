@@ -8,14 +8,18 @@ pipe = pipeline("image-segmentation", model="briaai/RMBG-1.4", trust_remote_code
 
 # Function to perform image segmentation
 def segment_image(image):
-    # Convert PIL image to numpy array
-    image_np = np.array(image)
-    # Perform image segmentation
-    results = pipe(image_np)
-    # Get the segmented image and mask
-    segmented_image = Image.fromarray(results[0]['segmentation'])
-    mask = Image.fromarray(results[0]['mask'])
-    return segmented_image, mask
+    try:
+        # Convert PIL image to a numpy array
+        image_np = np.array(image)
+        # Perform image segmentation
+        results = pipe(image_np)
+        # Get the segmented image and mask
+        segmented_image = Image.fromarray(results[0]['segmentation'])
+        mask = Image.fromarray(results[0]['mask'])
+        return segmented_image, mask
+    except Exception as e:
+        st.error(f"An error occurred during segmentation: {e}")
+        return None, None
 
 # Streamlit UI
 st.title("Image Segmentation with Transformers")
@@ -29,5 +33,6 @@ if uploaded_file is not None:
     if st.button("Segment Image"):
         segmented_image, mask = segment_image(image)
         
-        st.image(segmented_image, caption="Segmented Image", use_column_width=True)
-        st.image(mask, caption="Mask", use_column_width=True)
+        if segmented_image and mask:
+            st.image(segmented_image, caption="Segmented Image", use_column_width=True)
+            st.image(mask, caption="Mask", use_column_width=True)
